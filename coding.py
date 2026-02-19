@@ -36,12 +36,12 @@ def movimientos_p(pos):
     return valido
 
 #este es el cerebro de nuestro programa, es quien nos permite ver al futuro y tambien calcular la distancia mas cercana con manhattan
-def minimax(p_gato,p_raton,profundidad,t_r):
+def minimax(p_gato,p_raton,profundidad,turno_raton):
     if p_gato==p_raton:#caso base
         return -999#es la peor situacion del raton el gato no tiene porque ya es redundante
     if profundidad==0:
         return abs(p_gato[0]-p_raton[0])+abs(p_gato[1]-p_raton[1])#aca se encuentra nuestr heuristica que seria la distancia de manhattan
-    if t_r==True:
+    if turno_raton==True:
         mejor_v=-1000000000#es nuestro punto de comparacion para poder ingresar los datos
         mov=movimientos_p(p_raton)
         for m in mov:
@@ -94,4 +94,5 @@ for i in range(turnos):
     time.sleep(0.5)#nuestro intervalo de tiempo
 if i==turnos-1:
     print("el raton escapo")
+
 
