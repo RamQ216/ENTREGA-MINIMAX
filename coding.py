@@ -1,123 +1,97 @@
-import time
-import math
+import time #nos sirve para dar intervalos a lo que se muestra en pantalla
 
+#declaramos el tamanho de nuestra matriz
+FILA=5
+COLUMNA=5
+#le damos la coordenadas al gato y al raton
+gato=[0,0]
+raton=[FILA-1,COLUMNA-1]
 
-fila=5
-columna=5
-pos_gato=(0,0)
-pos_raton=(fila-1,columna-1)
+#creamos el entorno mediante un for anidado
+def crear():
+    return[["_" for _ in range(COLUMNA)]for _ in range(FILA)]#es es una compresion de listas el for interno crea filas con "_" y el externo repite el proceso
 
+#imprimimos la matriz filaxfila
+def imprimir(imprimir):
+    for i in imprimir:
+        print(" ".join(i))#esto es fuadamental ya que nos permite imprimir fila por fila
 
-def crear_tablero():
-    return [["_" for _ in range(columna)] for _ in range(fila)]
-
-def mostrar_tablero(laboratorio):
-    for f in laboratorio:
-        print(" ".join(f))
-
-def pos_validas(pos):
-    f, c = pos
-    return 0 <= f < fila and 0 <= c < columna
-
-def actualizar_tablero():
-    tablero= crear_tablero()
-    if pos_validas(pos_raton):
-        tablero[pos_raton[0]][pos_raton[1]]="R"
-    else:
-        print("El rato no existe")
-    if pos_validas(pos_gato):
-        tablero[pos_gato[0]][pos_gato[1]]="G"
-    else:
-        print("El gato no existe")
-    return tablero
-
-
-def movimientos(pos):
+#cada vez que se mueven los personajes lo hacen en un tablero limpio
+def update():
+    matriz=crear()
+    if 0<=gato[0]<FILA and 0<=gato[1]<COLUMNA:
+        matriz[gato[0]][gato[1]]= "G"
+    if 0<=raton[0]<FILA and 0<=raton[1]<COLUMNA:
+        matriz[raton[0]][raton[1]]= "R"
+    return matriz
+#definimos los movimientos posibles dentro de la matriz
+def movimientos_p(pos):
     f=pos[0]
     c=pos[1]
-    mov=[(f-1,c),(f+1,c),(f,c-1),(f,c+1)]
-    mov_validos=[]
-    for m in mov:
-        if 0<=m[0]<fila and 0<=m[1]<columna:
-            mov_validos.append(m)
-    return mov_validos
+    movi=[(f-1,c),(f+1,c),(f,c-1),(f,c+1)]
+    valido=[]
+    for m in movi:
+        if 0<=m[0]<FILA and 0<=m[1]<COLUMNA:
+            valido.append(m)
+    return valido
 
-
-
-
-def minimax(p_gato, p_raton, profundidad, es_raton):
-    # Si el gato atrapa al ratón, es el fin para el ratón
-    if p_gato == p_raton:
-        return -999 if es_raton else 999
-
-        # Cuando dejamos de mirar el futuro, devolvemos la distancia
-    if profundidad == 0:
-        return abs(p_gato[0] - p_raton[0]) + abs(p_gato[1] - p_raton[1])
-
-    if es_raton:
-        mejor_v = -math.inf
-        # El ratón prueba sus movimientos legales
-        for mov in movimientos(p_raton):
-            valor = minimax(p_gato, mov, profundidad - 1, False)
-            mejor_v = max(mejor_v, valor)
+#este es el cerebro de nuestro programa, es quien nos permite ver al futuro y tambien calcular la distancia mas cercana con manhattan
+def minimax(p_gato,p_raton,profundidad,t_r):
+    if p_gato==p_raton:#caso base
+        return -999#es la peor situacion del raton el gato no tiene porque ya es redundante
+    if profundidad==0:
+        return abs(p_gato[0]-p_raton[0])+abs(p_gato[1]-p_raton[1])#aca se encuentra nuestr euristica que seria la distancia de manhattan
+    if t_r==True:
+        mejor_v=-1000000000#es nuestro punto de comparacion para poder ingresar los datos
+        mov=movimientos_p(p_raton)
+        for m in mov:
+            valor=minimax(p_gato, m, profundidad-1, False)#aca se realiza nuestra recursividad 
+            mejor_v=max(mejor_v, valor)
         return mejor_v
     else:
-        mejor_v = math.inf
-        # El gato prueba sus movimientos legales
-        for mov in movimientos(p_gato):
-            valor = minimax(mov, p_raton, profundidad - 1, True)
-            mejor_v = min(mejor_v, valor)
+        mejor_v=1000000000#es nuestro punto de comparacion para poder ingresar los datos
+        mov=movimientos_p(p_gato)
+        for m in mov:
+            valor=minimax(m, p_raton, profundidad-1, True)#aca se realiza nuestra recursividad 
+            mejor_v=min(mejor_v, valor)
         return mejor_v
+    
+def IA_GATO():#aca le decimos a nuestro gato que se mueva a su mejor opcion mediante el minimax y la euristica que nos da el mejor movimiento
+    global gato
+    mejor_v=100000000
+    mejor_mov=gato
+    mov=movimientos_p(gato)
+    for m in  mov:
+        valor=minimax(m, raton, 5, True)
+        if valor<mejor_v:
+            mejor_v=valor
+            mejor_mov=m
+    gato=mejor_mov
 
+def IA_RATON():#aca le decimos a nuestro raton que se mueva a su mejor opcion mediante el minimax y la euristica que nos da el mejor movimiento
+    global raton
+    mejor_v=-100000000
+    mejor_mov=raton
+    mov=movimientos_p(raton)
+    for m in  mov:
+        valor=minimax(gato, m, 2, False)
+        if valor>mejor_v:
+            mejor_v=valor
+            mejor_mov=m
+    raton=mejor_mov
 
-def IA_gato():
-    global pos_gato  # Para poder cambiar la posición real
-    opciones = movimientos(pos_gato)
-    mejor_mov = pos_gato
-    mejor_valor = math.inf  # El gato busca el valor más bajo (distancia pequeña)
-
-    for mov in opciones:
-        # Simulamos qué pasaría si el gato mueve aquí
-        valor = minimax(mov, pos_raton, 4, True)
-        if valor < mejor_valor:
-            mejor_valor = valor
-            mejor_mov = mov
-
-    pos_gato = mejor_mov  # Aquí es donde el raton realmente se mueve
-def IA_raton():
-    global pos_raton  # Para poder cambiar la posición real
-    opciones = movimientos(pos_raton)
-    mejor_mov = pos_raton
-    mejor_valor = -math.inf  # El raton busca el valor más alto (distancia pequeña)
-
-    for mov in opciones:
-        # Simulamos qué pasaría si el raton mueve aquí
-        valor = minimax(pos_gato, mov, 2, False)
-        if valor > mejor_valor:
-            mejor_valor = valor
-            mejor_mov = mov
-
-    pos_raton = mejor_mov
+#este seria nuestro motor que ietra e imprime en pantalla el tablero
 turnos=10
-
-
-# Bucle simple de 10 turnos
 for i in range(turnos):
-    print(f"\nTurno {i + 1}")
-
-    # 1. El Gato piensa y mueve
-    IA_gato()
-    if pos_gato == pos_raton:
-        tablero_final = actualizar_tablero()
-        mostrar_tablero(tablero_final)
-        print("¡EL GATO ATRAPÓ AL RATÓN!")
+    print(f"\nTURNOS {i+1}")
+    IA_GATO()
+    if gato==raton:
+        print("el gato comio raton")
         break
-    IA_raton()
+    IA_RATON()
+   
+    imprimir(update())
+    time.sleep(0.5)#nuestro intervalo de tiempo
+if i==turnos-1:
+    print("el raton escapo")
 
-    # 2. Dibujamos el resultado
-    tablero_actualizado = actualizar_tablero()
-    mostrar_tablero(tablero_actualizado)
-    time.sleep(0.5)
-    # 3. Revisar si ganó
-    if i>=turnos-1:
-        print("el raton escapo")
