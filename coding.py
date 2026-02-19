@@ -1,8 +1,8 @@
 import time #nos sirve para dar intervalos a lo que se muestra en pantalla
 
 #declaramos el tamanho de nuestra matriz
-FILA=5
-COLUMNA=5
+FILA=7
+COLUMNA=7
 #le damos la coordenadas al gato y al raton
 gato=[0,0]
 raton=[FILA-1,COLUMNA-1]
@@ -16,7 +16,7 @@ def imprimir(imprimir):
     for i in imprimir:
         print(" ".join(i))#esto es fuadamental ya que nos permite imprimir fila por fila
 
-#cada vez que se mueven los personajes lo hacen en un tablero limpio
+#cada vez que se mueven los personajes lo hacen en un tablero limpio tambien "colocamos" alos personajes en el tablero
 def update():
     matriz=crear()
     if 0<=gato[0]<FILA and 0<=gato[1]<COLUMNA:
@@ -40,7 +40,7 @@ def minimax(p_gato,p_raton,profundidad,t_r):
     if p_gato==p_raton:#caso base
         return -999#es la peor situacion del raton el gato no tiene porque ya es redundante
     if profundidad==0:
-        return abs(p_gato[0]-p_raton[0])+abs(p_gato[1]-p_raton[1])#aca se encuentra nuestr euristica que seria la distancia de manhattan
+        return abs(p_gato[0]-p_raton[0])+abs(p_gato[1]-p_raton[1])#aca se encuentra nuestr heuristica que seria la distancia de manhattan
     if t_r==True:
         mejor_v=-1000000000#es nuestro punto de comparacion para poder ingresar los datos
         mov=movimientos_p(p_raton)
@@ -56,7 +56,7 @@ def minimax(p_gato,p_raton,profundidad,t_r):
             mejor_v=min(mejor_v, valor)
         return mejor_v
     
-def IA_GATO():#aca le decimos a nuestro gato que se mueva a su mejor opcion mediante el minimax y la euristica que nos da el mejor movimiento
+def IA_GATO():#aca le decimos a nuestro gato que se mueva a su mejor opcion mediante el minimax y la heuristica que nos da el mejor movimiento
     global gato
     mejor_v=100000000
     mejor_mov=gato
@@ -68,7 +68,7 @@ def IA_GATO():#aca le decimos a nuestro gato que se mueva a su mejor opcion medi
             mejor_mov=m
     gato=mejor_mov
 
-def IA_RATON():#aca le decimos a nuestro raton que se mueva a su mejor opcion mediante el minimax y la euristica que nos da el mejor movimiento
+def IA_RATON():#aca le decimos a nuestro raton que se mueva a su mejor opcion mediante el minimax y la heuristica que nos da el mejor movimiento
     global raton
     mejor_v=-100000000
     mejor_mov=raton
@@ -80,7 +80,7 @@ def IA_RATON():#aca le decimos a nuestro raton que se mueva a su mejor opcion me
             mejor_mov=m
     raton=mejor_mov
 
-#este seria nuestro motor que ietra e imprime en pantalla el tablero
+#este seria nuestro motor que itera e imprime en pantalla el tablero
 turnos=10
 for i in range(turnos):
     print(f"\nTURNOS {i+1}")
